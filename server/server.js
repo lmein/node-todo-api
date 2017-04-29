@@ -38,7 +38,6 @@ app.get('/todos', (req, res) => {
   }, (e) => {
     res.status(400).send(e);
   });
-
 });
 
 //port for the server to listen on for the application
