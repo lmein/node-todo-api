@@ -10,6 +10,7 @@ var {User} = require('./models/user.js');
 
 //app stores express application
 var app = express();
+//change for heroku
 const port = process.env.PORT || 3000;
 
 //bodyParser takes json and converts to object and attaches to request object
@@ -68,7 +69,7 @@ app.get('/todos/:id', (req, res) => {
 
 //port for the server to listen on for the application
 app.listen(port, () => {
-  console.log(`Started on port ${port}`);
+  console.log(`Started on port ${port}.`);
 });
 
 module.exports = {app};
