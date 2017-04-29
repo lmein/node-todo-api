@@ -31,6 +31,16 @@ app.post('/todos', (req, res) => {
   });
 });
 
+app.get('/todos', (req, res) => {
+  Todo.find().then((todos) => {
+      res.send({todos});
+      //the following is in case an error happens in todo.find above.
+  }, (e) => {
+    res.status(400).send(e);
+  });
+
+});
+
 //port for the server to listen on for the application
 app.listen(3000, () => {
   console.log('Started on port 3000.');
