@@ -1,6 +1,7 @@
 //library imports
 var express = require('express');
 var bodyParser = require('body-parser');
+var {ObjectID} = require ('mongodb');
 
 //local imports
 var {mongoose} = require('./db/mongoose.js');
@@ -37,6 +38,30 @@ app.get('/todos', (req, res) => {
       //the following is in case an error happens in todo.find above.
   }, (e) => {
     res.status(400).send(e);
+  });
+});
+
+app.get('/todos/:id', (req, res) => {
+  var id = req.params.id;
+  if (!ObjectID.isValid(id)) {
+    //console.log('ID is not valid.');
+    return res.status(404).send();
+  };
+  //  res.send({id});
+  // console.log('ID:', id);
+  Todo.findById(id).then((todo) => {
+    //the following if handles if ID is invalid
+    if(!todo) {
+      //return console.log('ID not found.');
+      return res.status(404).send('ID not valid.');
+    }
+    //console.log('Todo by id: ', todo);
+    //res.send(todo);
+    res.send({todo});
+    //res.status(200).send('Todo by id', todo);
+    //the following catch is for an invalid id (such as one with additional characters)
+  }).catch((e) => {
+    res.status(400).send()
   });
 });
 
