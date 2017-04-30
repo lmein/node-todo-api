@@ -63,8 +63,28 @@ app.get('/todos/:id', (req, res) => {
     //res.status(200).send('Todo by id', todo);
     //the following catch is for an invalid id (such as one with additional characters)
   }).catch((e) => {
-    res.status(400).send()
+    res.status(400).send();
   });
+});
+
+app.delete('/todos/:id', (req, res) => {
+  //get the id
+  var id = req.params.id;
+  //validate the id
+  if (!ObjectID.isValid(id)) {
+    //console.log('ID is not valid.');
+    return res.status(404).send();
+  };
+  //remove todo
+  Todo.findByIdAndRemove(id).then((todo) => {
+    if(!todo) {
+      return res.status(404).send('ID not valid.');
+    }
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  });
+
 });
 
 //port for the server to listen on for the application
