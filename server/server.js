@@ -1,3 +1,6 @@
+//this gets the test, development, production config file.
+require('./config/config.js');
+
 //library imports
 const _ = require('lodash');
 const express = require('express');
@@ -12,7 +15,7 @@ var {User} = require('./models/user.js');
 //app stores express application
 var app = express();
 //change for heroku
-const port = process.env.PORT || 3000;
+const port = process.env.PORT;
 
 //bodyParser takes json and converts to object and attaches to request object
 app.use(bodyParser.json());
