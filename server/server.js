@@ -1,7 +1,8 @@
 //library imports
-var express = require('express');
-var bodyParser = require('body-parser');
-var {ObjectID} = require ('mongodb');
+const _ = require('lodash');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require ('mongodb');
 
 //local imports
 var {mongoose} = require('./db/mongoose.js');
@@ -85,6 +86,38 @@ app.delete('/todos/:id', (req, res) => {
     res.status(400).send();
   });
 
+});
+
+app.patch('/todos/:id', (req, res) => {
+  //get the id
+  var id = req.params.id;
+  //pick of lodash controls what properties can be updated.  Here, the text and completed is put in an array as these can be chnaged by the user.
+  var body = _.pick(req.body, ['text', 'completed']);
+  //validate the id
+  if (!ObjectID.isValid(id)) {
+    //console.log('ID is not valid.');
+    return res.status(404).send();
+  };
+
+  //update completedAt field based on completed field
+  if (_.isBoolean(body.completed) && body.completed) {
+    //Date().getTime() returns a javascript timestamp.  1/1/70 - unix epic
+    body.completedAt = new Date().getTime();
+  } else {
+    body.completed = false;
+    //the following removes value from database.
+    body.completedAt = null;
+  }
+
+  //first argument: id itself (query), second argument: {set body} (update object), third argument: {new true} - (options)  this is the query.  .then callback and catch callback follow.
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+    if (!todo) {
+      return res.status(404).send()
+    }
+    res.send({todo});
+  }).catch((e) => {
+    res.status(400).send();
+  });
 });
 
 //port for the server to listen on for the application
