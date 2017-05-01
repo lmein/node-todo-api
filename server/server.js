@@ -11,6 +11,7 @@ const {ObjectID} = require ('mongodb');
 var {mongoose} = require('./db/mongoose.js');
 var {Todo} = require('./models/todo.js');
 var {User} = require('./models/user.js');
+var {authenticate} = require('./middleware/authenticate.js');
 
 //app stores express application
 var app = express();
@@ -145,6 +146,27 @@ app.post('/users', (req, res) => {
     //sends the error back to the user
     res.status(400).send(e);
   });
+});
+
+
+
+//app.get('/users/me', (req, res) => {
+//add authenticate to this to use the middleware above
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
+  // var token = req.header('x-auth');
+  //
+  // User.findByToken(token).then((user) => {
+  //   if (!user) {
+  //     //res.status(401).send();
+  //     //the following stops execution and then it goes to the catch below.
+  //     return Promise.reject();
+  //   }
+  //
+  //   res.send(user);
+  // }).catch((e) => {
+  //   res.status(401).send();
+  // });
 });
 
 //port for the server to listen on for the application
