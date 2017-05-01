@@ -123,6 +123,30 @@ app.patch('/todos/:id', (req, res) => {
   });
 });
 
+//route configuration  2 arguements - URL ('/todos') and callback (req, res)
+app.post('/users', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+  //console.log(req.body);
+  //creates instance of a mongoose model
+  var user = new User(body);
+//model methods on upper case user
+  //User.findByToken
+//instance methods on lower case user
+  //user.generateAuthToken
+
+  //save model to database
+  user.save().then(() => {
+    //sends the doc back to the user - useful information
+    return user.generateAuthToken();
+  }).then((token) =>{
+    //x-: custom header
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    //sends the error back to the user
+    res.status(400).send(e);
+  });
+});
+
 //port for the server to listen on for the application
 app.listen(port, () => {
   console.log(`Started on port ${port}.`);
