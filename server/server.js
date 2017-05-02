@@ -22,11 +22,12 @@ const port = process.env.PORT;
 app.use(bodyParser.json());
 
 //route configuration  2 arguements - URL ('/todos') and callback (req, res)
-app.post('/todos', (req, res) => {
+app.post('/todos', authenticate, (req, res) => {
   //console.log(req.body);
   //creates instance of a mongoose model
   var todo = new Todo({
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id
   });
 
   //save model to database
@@ -39,8 +40,10 @@ app.post('/todos', (req, res) => {
   });
 });
 
-app.get('/todos', (req, res) => {
-  Todo.find().then((todos) => {
+app.get('/todos', authenticate, (req, res) => {
+  Todo.find({
+    _creator: req.user._id
+  }).then((todos) => {
       res.send({todos});
       //the following is in case an error happens in todo.find above.
   }, (e) => {
@@ -48,7 +51,7 @@ app.get('/todos', (req, res) => {
   });
 });
 
-app.get('/todos/:id', (req, res) => {
+app.get('/todos/:id', authenticate, (req, res) => {
   var id = req.params.id;
   if (!ObjectID.isValid(id)) {
     //console.log('ID is not valid.');
@@ -56,7 +59,11 @@ app.get('/todos/:id', (req, res) => {
   };
   //  res.send({id});
   // console.log('ID:', id);
-  Todo.findById(id).then((todo) => {
+  //Todo.findById(id).then((todo) => {
+  Todo.findOne({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     //the following if handles if ID is invalid
     if(!todo) {
       //return console.log('ID not found.');
@@ -72,7 +79,7 @@ app.get('/todos/:id', (req, res) => {
   });
 });
 
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', authenticate, (req, res) => {
   //get the id
   var id = req.params.id;
   //validate the id
@@ -81,7 +88,11 @@ app.delete('/todos/:id', (req, res) => {
     return res.status(404).send();
   };
   //remove todo
-  Todo.findByIdAndRemove(id).then((todo) => {
+  //Todo.findByIdAndRemove(id).then((todo) => {
+  Todo.findOneAndRemove({
+    _id: id,
+    _creator: req.user._id
+  }).then((todo) => {
     if(!todo) {
       return res.status(404).send('ID not valid.');
     }
@@ -92,7 +103,7 @@ app.delete('/todos/:id', (req, res) => {
 
 });
 
-app.patch('/todos/:id', (req, res) => {
+app.patch('/todos/:id', authenticate, (req, res) => {
   //get the id
   var id = req.params.id;
   //pick of lodash controls what properties can be updated.  Here, the text and completed is put in an array as these can be chnaged by the user.
@@ -114,7 +125,11 @@ app.patch('/todos/:id', (req, res) => {
   }
 
   //first argument: id itself (query), second argument: {set body} (update object), third argument: {new true} - (options)  this is the query.  .then callback and catch callback follow.
-  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+  //Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then((todo) => {
+  Todo.findOneAndUpdate({
+    _id: id,
+    _creator: req.user._id
+  }, {$set: body}, {new: true}).then((todo) => {
     if (!todo) {
       return res.status(404).send()
     }
