@@ -169,6 +169,21 @@ app.get('/users/me', authenticate, (req, res) => {
   // });
 });
 
+//post /userslogin {email, password}
+app.post('/users/login', (req, res) => {
+  var body = _.pick(req.body, ['email', 'password']);
+
+  User.findByCredentials(body.email, body.password).then ((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch((e) => {
+    //the following sets status to 400 and then sends that to app user.
+    res.status(400).send();
+  });
+  //res.send(body);
+});
+
 //port for the server to listen on for the application
 app.listen(port, () => {
   console.log(`Started on port ${port}.`);
